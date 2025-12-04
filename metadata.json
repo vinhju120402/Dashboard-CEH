@@ -1,0 +1,5 @@
+{
+  "name": "Giám Sát",
+  "description": "A port management interface for vessel berthing plans featuring complex forms, grid layouts, and tabular data controls.",
+  "requestFramePermissions": []
+}
