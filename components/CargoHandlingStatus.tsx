@@ -117,7 +117,7 @@ export const CargoHandlingStatus: React.FC = () => {
       </div>
 
       {/* KPI Dashboard - Modern Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1 */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:border-blue-300 transition-all">
             <div>
@@ -160,20 +160,6 @@ export const CargoHandlingStatus: React.FC = () => {
             </div>
             <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 group-hover:bg-orange-100 transition-colors">
                  <Clock size={20} />
-            </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between group hover:border-purple-300 transition-all">
-            <div>
-                <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Năng suất</span>
-                <div className="mt-1">
-                    <span className="text-2xl font-extrabold text-purple-600">{kpiData.productivity}</span>
-                    <span className="text-xs text-slate-500 ml-1 font-medium">Tấn/giờ</span>
-                </div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-100 transition-colors">
-                 <Activity size={20} />
             </div>
         </div>
       </div>
@@ -264,10 +250,6 @@ export const CargoHandlingStatus: React.FC = () => {
                                     Vị trí: <span className="font-bold text-blue-600">{crane.hold}</span>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-lg font-extrabold text-slate-700">{crane.rate}</div>
-                                <div className="text-[10px] text-slate-400 uppercase font-semibold">Tấn/Giờ</div>
-                            </div>
                         </div>
                         
                         {/* Truck Fleet Info */}
@@ -317,7 +299,6 @@ export const CargoHandlingStatus: React.FC = () => {
                 <th className="py-4 px-6 text-left bg-slate-50">Chủ hàng</th>
                 <th className="py-4 px-6 text-right bg-slate-50">Tổng Lượng (Tấn)</th>
                 <th className="py-4 px-6 text-right bg-slate-50">Đã Dỡ (Tấn)</th>
-                <th className="py-4 px-6 text-center bg-slate-50">Tiến độ</th>
               </tr>
             </thead>
             <tbody className="text-sm text-slate-700">
@@ -332,11 +313,6 @@ export const CargoHandlingStatus: React.FC = () => {
                           <td className="py-4 px-6 text-slate-600">{row.consignee}</td>
                           <td className="py-4 px-6 text-right font-medium">{row.weight.toLocaleString()}</td>
                           <td className="py-4 px-6 text-right text-green-600 font-bold">{row.done.toLocaleString()}</td>
-                          <td className="py-4 px-6">
-                              <div className="w-24 bg-slate-200 h-2 rounded-full overflow-hidden mx-auto">
-                                  <div className={`h-full rounded-full ${percent === 100 ? 'bg-green-500' : 'bg-blue-500'}`} style={{ width: `${percent}%` }}></div>
-                              </div>
-                          </td>
                       </tr>
                   );
               })}

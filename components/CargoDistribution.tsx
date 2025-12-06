@@ -12,9 +12,10 @@ export const CargoDistribution: React.FC = () => {
     id: i + 1,
     code: `TK-${(100 + i).toString().padStart(3, '0')}`,
     partner: ['Nhà máy Nhiệt điện TB', 'Xi măng Hoàng Thạch', 'Hòa Phát Steel', 'Tôn Hoa Sen', 'Gạch Ốp Lát'][i % 5],
+    owner: ['Tập đoàn Than KS', 'Tổng Cty Đông Bắc', 'Khoáng sản 3', 'Logistics ABC', 'Thương mại Hàng Hải'][i % 5],
     commodity: ['Than đá', 'Thạch cao', 'Quặng sắt', 'Đá vôi', 'Cát'][i % 5],
     pile: `Bãi ${['A', 'B', 'C'][i % 3]} - Lô ${String((i % 3) + 1).padStart(2, '0')}`,
-    requested: Math.floor(Math.random() * 5000) + 1000,
+    requestAmount: Math.floor(Math.random() * 5000) + 1000,
     actual: Math.floor(Math.random() * 5000),
     status: i % 3 === 0 ? 'processing' : 'completed'
   }));
@@ -24,9 +25,10 @@ export const CargoDistribution: React.FC = () => {
     id: i + 1,
     code: `BL-2506-${(i + 1).toString().padStart(2, '0')}`,
     partner: i % 2 === 0 ? 'MV. GLORY STAR' : 'MV. OCEAN BULK',
+    owner: ['Nhiệt điện TB', 'Hòa Phát Steel', 'Xi măng HP', 'Formosa', 'Thép Việt Nhật'][i % 5],
     commodity: ['Than đá', 'Quặng sắt', 'Thạch cao', 'Đá vôi', 'Than Cám'][i % 5],
     pile: `Bãi ${['A', 'B', 'C', 'D'][i % 4]} - Lô ${String((i % 4) + 1).padStart(2, '0')}`,
-    requested: Math.floor(Math.random() * 20000) + 5000,
+    requestAmount: Math.floor(Math.random() * 5000) + 2000,
     actual: Math.floor(Math.random() * 5000),
     status: i < 5 ? 'processing' : 'pending'
   }));
@@ -128,13 +130,13 @@ export const CargoDistribution: React.FC = () => {
                 <th className="py-4 px-6 border-r border-white/20 text-left">
                     {subTab === 'IMPORT' ? 'Nguồn hàng / Tàu' : 'Khách hàng / Đơn vị nhận'}
                 </th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Chủ hàng</th>
                 <th className="py-4 px-6 border-r border-white/20 text-left">Loại hàng</th>
                 <th className="py-4 px-6 border-r border-white/20 text-center">
                     Bãi
                 </th>
-                <th className="py-4 px-6 border-r border-white/20 text-right">Yêu cầu (Tấn)</th>
                 <th className="py-4 px-6 border-r border-white/20 text-right">
-                     {subTab === 'IMPORT' ? 'Đã nhập (Tấn)' : 'Đã giao (Tấn)'}
+                     Yêu cầu phân chia
                 </th>
               </tr>
             </thead>
@@ -148,13 +150,13 @@ export const CargoDistribution: React.FC = () => {
                           {row.code}
                       </td>
                       <td className="py-4 px-6 text-slate-600 font-medium">{row.partner}</td>
+                      <td className="py-4 px-6 text-slate-700 font-bold">{row.owner}</td>
                       <td className="py-4 px-6 text-slate-600">{row.commodity}</td>
                       <td className={`py-4 px-6 text-center font-bold flex items-center justify-center gap-2 ${subTab === 'IMPORT' ? 'text-blue-700' : 'text-orange-700'}`}>
                           <Layers size={14} className="opacity-50"/>
                           {row.pile}
                       </td>
-                      <td className="py-4 px-6 text-right font-medium">{row.requested.toLocaleString()}</td>
-                      <td className="py-4 px-6 text-right text-green-600 font-bold">{row.actual.toLocaleString()}</td>
+                      <td className="py-4 px-6 text-right font-medium text-slate-600">{row.requestAmount.toLocaleString()}</td>
                     </tr>
                   );
               })}

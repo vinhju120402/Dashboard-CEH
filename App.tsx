@@ -64,7 +64,7 @@ const App: React.FC = () => {
               <Ship size={16} /> Khai thác tàu
             </button>
             <button onClick={() => setActiveTab('TALLY')} className={getTabClass('TALLY')}>
-              <Clipboard size={16} /> Kiểm đếm
+              <Clipboard size={16} /> Kiểm đếm giao nhận
             </button>
             <button onClick={() => setActiveTab('WEIGH')} className={getTabClass('WEIGH')}>
               <Scale size={16} /> Trạm Cân
@@ -84,7 +84,7 @@ const App: React.FC = () => {
               <Database size={16} /> Tồn kho (Trộn)
             </button>
             <button onClick={() => setActiveTab('TALLY_SHIP_YARD')} className={getTabClass('TALLY_SHIP_YARD')}>
-              <Scale size={16} /> Đối chiếu Tàu/Bờ
+              <Scale size={16} /> Kiểm đếm Tàu-kho bãi
             </button>
             <button onClick={() => setActiveTab('CARGO_DIST')} className={getTabClass('CARGO_DIST')}>
               <Truck size={16} /> Phân bổ hàng

@@ -1,46 +1,128 @@
 
 import React, { useState } from 'react';
-import { Search, Clipboard, Truck } from 'lucide-react';
+import { Search, Clipboard, Truck, ArrowDownToLine, ArrowUpFromLine, Ship } from 'lucide-react';
 
 export const BulkTallyDelivery: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('');
+  const [subTab, setSubTab] = useState<'INBOUND' | 'OUTBOUND'>('INBOUND');
+  const [ticketFilter, setTicketFilter] = useState('');
+  const [vehicleFilter, setVehicleFilter] = useState('');
+  const [shipFilter, setShipFilter] = useState('');
 
-  // Generated 30 rows of tally data with Vietnamese Values
-  const tallyData = Array.from({ length: 30 }).map((_, i) => ({
-    id: i + 1,
-    ticket: `BL-2506-${(i + 1).toString().padStart(3, '0')}`,
-    truck: i % 3 === 0 ? `29C-123.${10 + i}` : i % 3 === 1 ? `14H-998.${20 + i}` : `15C-555.${30 + i}`,
-    timeIn: `17/06/2025 0${8 + Math.floor(i/4)}:${(i * 10) % 60 < 10 ? '0' : ''}${(i * 10) % 60}`,
-    timeOut: i > 25 ? '--' : `17/06/2025 0${9 + Math.floor(i/4)}:${(i * 10 + 20) % 60 < 10 ? '0' : ''}${(i * 10 + 20) % 60}`,
-    commodity: i % 2 === 0 ? 'Than đá' : 'Quặng sắt',
-    netWeight: i > 25 ? 0 : Math.floor(Math.random() * 10000) + 15000,
-    tallyman: i % 2 === 0 ? 'Nguyễn Văn A' : 'Trần Văn B',
-    shift: 'Ca 1',
-  }));
+  // Generated 50 rows of tally data with types
+  const tallyData = Array.from({ length: 50 }).map((_, i) => {
+    // Distribute types: Even index = INBOUND (Hạ tập kết), Odd = OUTBOUND (Xuất tàu)
+    const type = i % 2 === 0 ? 'INBOUND' : 'OUTBOUND';
+    
+    return {
+        id: i + 1,
+        ticket: `TK-2506-${(i + 1).toString().padStart(3, '0')}`,
+        // For OUTBOUND, use format CP1, CP2... for INBOUND keep license plates
+        truck: type === 'INBOUND' ? `29C-123.${10 + i}` : `CP${(i % 5) + 1}`,
+        timeIn: `17/06/2025 0${8 + Math.floor(i/10)}:${(i * 5) % 60 < 10 ? '0' : ''}${(i * 5) % 60}`,
+        timeOut: i > 40 ? '--' : `17/06/2025 0${9 + Math.floor(i/10)}:${(i * 5 + 25) % 60 < 10 ? '0' : ''}${(i * 5 + 25) % 60}`,
+        commodity: i % 3 === 0 ? 'Than đá' : i % 3 === 1 ? 'Quặng sắt' : 'Thạch cao',
+        netWeight: i > 40 ? 0 : Math.floor(Math.random() * 10000) + 15000,
+        tallyman: i % 2 === 0 ? 'Nguyễn Văn A' : 'Trần Văn B',
+        shift: ['Ca 1', 'Ca 2', 'Ca 3'][i % 3],
+        type: type,
+        ship: i % 3 === 0 ? 'MV. GLORY STAR' : (i % 3 === 1 ? 'MV. OCEAN BULK' : 'MV. PACIFIC DREAM')
+    };
+  });
 
   const filteredData = tallyData.filter(item => {
-    if (!dateFilter) return true;
-    const [year, month, day] = dateFilter.split('-');
-    const formattedDate = `${day}/${month}/${year}`;
-    // Check if the date string is present in either Time In or Time Out
-    return item.timeIn.includes(formattedDate) || (item.timeOut !== '--' && item.timeOut.includes(formattedDate));
+    // Filter by Sub Tab
+    if (item.type !== subTab) return false;
+
+    // Filter by Ship
+    if (shipFilter && item.ship !== shipFilter) return false;
+
+    // Filter by Date
+    if (dateFilter) {
+        const [year, month, day] = dateFilter.split('-');
+        const formattedDate = `${day}/${month}/${year}`;
+        if (!(item.timeIn.includes(formattedDate) || (item.timeOut !== '--' && item.timeOut.includes(formattedDate)))) {
+            return false;
+        }
+    }
+    
+    // Filter by Ticket
+    if (ticketFilter && !item.ticket.toLowerCase().includes(ticketFilter.toLowerCase())) {
+        return false;
+    }
+
+    // Filter by Vehicle
+    if (vehicleFilter && !item.truck.toLowerCase().includes(vehicleFilter.toLowerCase())) {
+        return false;
+    }
+
+    return true;
   });
 
   const totalWeight = filteredData.reduce((acc, curr) => acc + curr.netWeight, 0);
 
   return (
     <div className="flex flex-col gap-6 animate-fadeIn">
+      
+      {/* Sub-tabs Navigation */}
+      <div className="flex justify-center gap-4 border-b border-slate-200 pb-1">
+        <button
+            onClick={() => setSubTab('INBOUND')}
+            className={`px-8 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                subTab === 'INBOUND' 
+                ? 'bg-white text-blue-700 border-blue-600 shadow-sm -mb-px border-x border-slate-200 z-10' 
+                : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
+            }`}
+        >
+            <ArrowDownToLine size={18} />
+            HẠ TẬP KẾT
+        </button>
+        <button
+            onClick={() => setSubTab('OUTBOUND')}
+             className={`px-8 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                subTab === 'OUTBOUND' 
+                ? 'bg-white text-orange-600 border-orange-500 shadow-sm -mb-px border-x border-slate-200 z-10' 
+                : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
+            }`}
+        >
+            <ArrowUpFromLine size={18} />
+            XUẤT TÀU
+        </button>
+      </div>
+
       {/* Control & Filter Bar */}
       <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           
           <div className="flex flex-wrap items-center gap-6">
              <div className="flex items-center gap-3 mr-4">
-                <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                <div className={`p-2 rounded-lg ${subTab === 'INBOUND' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
                     <Clipboard size={20} />
                 </div>
-                <h3 className="font-bold text-slate-700 text-sm uppercase">Sổ Kiểm Đếm</h3>
+                <h3 className="font-bold text-slate-700 text-sm uppercase">
+                    {subTab === 'INBOUND' ? 'Sổ Kiểm Đếm (Hạ Bãi)' : 'Sổ Kiểm Đếm (Xuất Tàu)'}
+                </h3>
              </div>
+
+            {/* Ship Filter - Only show for OUTBOUND */}
+            {subTab === 'OUTBOUND' && (
+                <div className="flex flex-col">
+                <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Tàu chuyến</label>
+                <div className="relative">
+                    <select 
+                        value={shipFilter}
+                        onChange={(e) => setShipFilter(e.target.value)}
+                        className="border border-slate-300 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white min-w-[180px] shadow-sm appearance-none"
+                    >
+                        <option value="">Tất cả tàu</option>
+                        <option value="MV. GLORY STAR">MV. GLORY STAR</option>
+                        <option value="MV. OCEAN BULK">MV. OCEAN BULK</option>
+                        <option value="MV. PACIFIC DREAM">MV. PACIFIC DREAM</option>
+                    </select>
+                    <Ship size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+                </div>
+                </div>
+            )}
 
             {/* Date Filter */}
             <div className="flex flex-col">
@@ -49,45 +131,60 @@ export const BulkTallyDelivery: React.FC = () => {
                   type="date" 
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-40 shadow-sm"
+                  className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-36 shadow-sm"
               />
             </div>
 
             {/* Shift Filter */}
             <div className="flex flex-col">
               <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Ca làm việc</label>
-              <select className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-40 shadow-sm">
-                  <option value="1">Ca 1 (Sáng)</option>
-                  <option value="2">Ca 2 (Chiều)</option>
-                  <option value="3">Ca 3 (Đêm)</option>
+              <select className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-32 shadow-sm">
+                  <option value="">Tất cả</option>
+                  <option value="Ca 1">Ca 1</option>
+                  <option value="Ca 2">Ca 2</option>
+                  <option value="Ca 3">Ca 3</option>
               </select>
             </div>
 
-             {/* Commodity Filter */}
+             {/* Ticket Filter */}
              <div className="flex flex-col">
-              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Loại hàng</label>
-              <select className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-48 shadow-sm">
-                  <option value="">Tất cả</option>
-                  <option value="coal">Than đá</option>
-                  <option value="ore">Quặng sắt</option>
-                  <option value="gypsum">Thạch cao</option>
-              </select>
+              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Số tờ khai</label>
+              <input 
+                  type="text" 
+                  value={ticketFilter}
+                  onChange={(e) => setTicketFilter(e.target.value)}
+                  placeholder="Nhập số tờ khai..."
+                  className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-40 shadow-sm"
+              />
             </div>
+
+            {/* Vehicle Filter */}
+            <div className="flex flex-col">
+              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Số xe</label>
+              <input 
+                  type="text" 
+                  value={vehicleFilter}
+                  onChange={(e) => setVehicleFilter(e.target.value)}
+                  placeholder="Nhập số xe..."
+                  className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-32 shadow-sm"
+              />
+            </div>
+            
           </div>
 
-          <div className="flex items-center gap-6 bg-blue-50 px-5 py-3 rounded-lg border border-blue-100">
+          <div className={`flex items-center gap-6 px-5 py-3 rounded-lg border ml-auto ${subTab === 'INBOUND' ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`}>
                 <div className="flex flex-col items-end">
                     <span className="text-xs text-slate-500 uppercase font-bold">Tổng lượt xe</span>
                     <span className="text-xl font-black text-slate-800">{filteredData.length}</span>
                 </div>
-                <div className="w-px h-8 bg-blue-200"></div>
+                <div className={`w-px h-8 ${subTab === 'INBOUND' ? 'bg-blue-200' : 'bg-orange-200'}`}></div>
                 <div className="flex flex-col items-end">
                     <span className="text-xs text-slate-500 uppercase font-bold">Tổng khối lượng</span>
-                    <span className="text-xl font-black text-blue-700">{totalWeight.toLocaleString()} <span className="text-xs text-slate-500 font-bold">kg</span></span>
+                    <span className={`text-xl font-black ${subTab === 'INBOUND' ? 'text-blue-700' : 'text-orange-700'}`}>{totalWeight.toLocaleString()} <span className="text-xs text-slate-500 font-bold">kg</span></span>
                 </div>
           </div>
 
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-200 text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-all shadow-sm self-start md:self-center">
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-200 text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-all shadow-sm self-start xl:self-center">
              <Search size={16} />
              <span>Nạp dữ liệu</span>
           </button>
@@ -99,16 +196,19 @@ export const BulkTallyDelivery: React.FC = () => {
         <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
           <table className="w-full border-collapse min-w-[1000px]">
             <thead className="sticky top-0 z-10">
-              <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200 shadow-sm">
-                <th className="py-4 px-6 border-r border-slate-100 w-16 text-center bg-slate-50">STT</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Số Vận Đơn</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Số xe / Romooc</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-center bg-slate-50">Giờ Vào</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-center bg-slate-50">Giờ Ra</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Hàng hóa</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-right bg-slate-50">Khối Lượng Tịnh (kg)</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Nhân viên KĐ</th>
-                <th className="py-4 px-6 text-center bg-slate-50">Trạng thái</th>
+              <tr className={`text-xs font-bold uppercase tracking-wider border-b border-slate-200 shadow-sm ${subTab === 'INBOUND' ? 'bg-blue-50 text-blue-800' : 'bg-orange-50 text-orange-800'}`}>
+                <th className="py-4 px-6 border-r border-white/20 w-16 text-center">STT</th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Số tờ khai</th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">
+                    {subTab === 'INBOUND' ? 'Số xe / Romooc' : 'Số xe'}
+                </th>
+                <th className="py-4 px-6 border-r border-white/20 text-center">Ca làm việc</th>
+                <th className="py-4 px-6 border-r border-white/20 text-center">Giờ Vào</th>
+                <th className="py-4 px-6 border-r border-white/20 text-center">Giờ Ra</th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Hàng hóa</th>
+                <th className="py-4 px-6 border-r border-white/20 text-right">Khối Lượng Tịnh (kg)</th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Nhân viên KĐ</th>
+                <th className="py-4 px-6 text-center">Trạng thái</th>
               </tr>
             </thead>
             <tbody className="text-sm text-slate-700">
@@ -120,6 +220,7 @@ export const BulkTallyDelivery: React.FC = () => {
                       <div className="bg-slate-100 p-1 rounded text-slate-500"><Truck size={14}/></div>
                       {row.truck}
                   </td>
+                  <td className="py-4 px-6 text-center text-slate-600 font-medium">{row.shift}</td>
                   <td className="py-4 px-6 text-center text-slate-600">{row.timeIn}</td>
                   <td className="py-4 px-6 text-center text-slate-600">{row.timeOut}</td>
                   <td className="py-4 px-6 font-medium text-slate-700">{row.commodity}</td>
@@ -138,7 +239,7 @@ export const BulkTallyDelivery: React.FC = () => {
               ))}
               {filteredData.length === 0 && (
                 <tr>
-                    <td colSpan={9} className="py-8 text-center text-slate-400 italic">Không tìm thấy dữ liệu phù hợp</td>
+                    <td colSpan={10} className="py-8 text-center text-slate-400 italic">Không tìm thấy dữ liệu phù hợp</td>
                 </tr>
               )}
             </tbody>

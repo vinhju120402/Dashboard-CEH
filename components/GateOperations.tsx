@@ -69,12 +69,12 @@ export const GateOperations: React.FC = () => {
              </div>
 
              <div className="flex flex-col">
-                <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Số Phiếu</label>
+                <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Số Tờ Khai</label>
                 <input 
                   type="text" 
                   value={ticketFilter}
                   onChange={(e) => setTicketFilter(e.target.value)}
-                  placeholder="Tìm số phiếu..."
+                  placeholder="Tìm số tờ khai..."
                   className="border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 w-48 shadow-sm"
                 />
              </div>
@@ -95,7 +95,7 @@ export const GateOperations: React.FC = () => {
                 <th className="py-4 px-6 border-r border-slate-100 w-16 text-center bg-slate-50">STT</th>
                 <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Cổng kiểm soát</th>
                 <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Số xe / Số romooc</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Số Phiếu</th>
+                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Số Tờ Khai</th>
                 <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Tài xế</th>
                 <th className="py-4 px-6 border-r border-slate-100 text-center bg-slate-50">Giờ vào</th>
                 <th className="py-4 px-6 border-r border-slate-100 text-center bg-slate-50">Giờ ra</th>

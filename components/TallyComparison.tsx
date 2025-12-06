@@ -1,192 +1,411 @@
 
-import React from 'react';
-import { Search, Scale, Anchor, ArrowRight, AlertCircle, FileText } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Anchor, ArrowRightLeft, FileBarChart, RefreshCw, ClipboardCheck, AlertCircle, Construction, Layers, Truck, Clock, Hammer } from 'lucide-react';
 
 export const TallyComparison: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'COMPARISON' | 'CRANE' | 'YARD'>('COMPARISON');
+  const [selectedShip, setSelectedShip] = useState('MV. GLORY STAR (V.2506)');
+
+  // Data now distinguishes between Crane Tally and Yard Tally
   const reportData = {
     shipName: 'MV. GLORY STAR',
     voyage: 'V.2506',
     commodity: 'Than đá',
-    draftSurvey: 45200, 
-    scaleTotal: 45150,  
-    tolerancePercent: 0.11,
-    status: 'match',
+    manifestTotal: 45000, // Số liệu khai báo
+    craneTotal: 45100,    // Tổng đầu cần
+    yardTotal: 44950,     // Tổng thực nhập tại bãi
   };
   
-  const variance = reportData.scaleTotal - reportData.draftSurvey;
+  // Variance typically compares Final Yard Receipt vs Manifest
+  const variance = reportData.yardTotal - reportData.manifestTotal;
+  const variancePercent = (variance / reportData.manifestTotal) * 100;
+  const isToleranceOk = Math.abs(variancePercent) <= 0.5;
 
   const shiftDetails = [
-    { id: 1, shift: 'Ca 1 (17/06)', draft: 15000, scale: 14980, diff: -20 },
-    { id: 2, shift: 'Ca 2 (17/06)', draft: 14500, scale: 14550, diff: +50 },
-    { id: 3, shift: 'Ca 3 (17/06)', draft: 15700, scale: 15620, diff: -80 },
-    { id: 4, shift: 'Ca 1 (16/06)', draft: 14000, scale: 14020, diff: +20 },
-    { id: 5, shift: 'Ca 2 (16/06)', draft: 13500, scale: 13480, diff: -20 },
-    { id: 6, shift: 'Ca 3 (16/06)', draft: 13000, scale: 13010, diff: +10 },
+    { id: 1, shift: 'Ca 1', date: '17/06/2025', manifest: 15000, craneTally: 15050, yardTally: 14990, note: 'Hao hụt vận chuyển' },
+    { id: 2, shift: 'Ca 2', date: '17/06/2025', manifest: 15000, craneTally: 15020, yardTally: 15010, note: 'Bình thường' },
+    { id: 3, shift: 'Ca 3', date: '17/06/2025', manifest: 15000, craneTally: 15030, yardTally: 14950, note: 'Đang kiểm tra lại' },
   ];
+
+  // Helper to format time correctly
+  const formatTime = (hour: number, minute: number) => {
+    const extraHours = Math.floor(minute / 60);
+    const finalHour = hour + extraHours;
+    const finalMinute = minute % 60;
+    return `${String(finalHour).padStart(2, '0')}:${String(finalMinute).padStart(2, '0')}`;
+  };
+
+  // Mock Data for Crane Tally
+  const craneTallyData = Array.from({ length: 20 }).map((_, i) => ({
+    id: i + 1,
+    hold: `Hầm ${['1', '2', '3', '4', '5'][i % 5]}`,
+    equipment: `Cẩu ${['01', '02', '03'][i % 3]}`,
+    truck: `29C-${120 + i}.${30 + i}`,
+    time: `17/06/2025 ${formatTime(10, 30 + i)}`,
+    commodity: 'Than đá',
+    weight: 30000 + Math.floor(Math.random() * 5000), // Kg
+    tallyman: 'Nguyễn Văn A'
+  }));
+
+  // Mock Data for Yard Tally
+  const yardTallyData = Array.from({ length: 20 }).map((_, i) => {
+    const minStart = 15 + (i * 2); 
+    const minEnd = minStart + 12;
+    
+    return {
+      id: i + 1,
+      location: `Bãi ${['A', 'B', 'C'][i % 3]} - Lô ${Math.floor(i/5)+1}`,
+      equipment: ['Máy xúc MX-01', 'Máy xúc MX-02', 'Băng tải T1'][i % 3],
+      truck: `29C-${120 + i}.${30 + i}`,
+      timeIn: `17/06/2025 ${formatTime(10, minStart)}`,
+      timeOut: `17/06/2025 ${formatTime(10, minEnd)}`,
+      commodity: 'Than đá',
+      netWeight: 30100 + Math.floor(Math.random() * 4000), // Kg
+      status: 'completed',
+      weigher: 'Trần Văn B'
+    };
+  });
 
   return (
     <div className="flex flex-col gap-6 animate-fadeIn h-full">
-      {/* Header / Filter Bar */}
+      {/* Sub-tabs Navigation */}
+      <div className="flex justify-center gap-4 border-b border-slate-200 pb-1">
+            <button
+                onClick={() => setActiveTab('COMPARISON')}
+                className={`px-6 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                    activeTab === 'COMPARISON'
+                    ? 'bg-white text-blue-700 border-blue-600 shadow-sm -mb-px border-x border-slate-200 z-10'
+                    : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100'
+                }`}
+            >
+                <ArrowRightLeft size={18} />
+                ĐỐI CHIẾU
+            </button>
+            <button
+                onClick={() => setActiveTab('CRANE')}
+                className={`px-6 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                    activeTab === 'CRANE'
+                    ? 'bg-white text-orange-600 border-orange-500 shadow-sm -mb-px border-x border-slate-200 z-10'
+                    : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100'
+                }`}
+            >
+                <Construction size={18} />
+                TALLY ĐẦU CẦN
+            </button>
+            <button
+                onClick={() => setActiveTab('YARD')}
+                className={`px-6 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                    activeTab === 'YARD'
+                    ? 'bg-white text-green-600 border-green-500 shadow-sm -mb-px border-x border-slate-200 z-10'
+                    : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100'
+                }`}
+            >
+                <Layers size={18} />
+                TALLY BÃI
+            </button>
+      </div>
+
+      {/* Control Panel (Common for all tabs) */}
       <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-         <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
-                      <Scale size={20} />
-                  </div>
-                  <h3 className="font-bold text-slate-700 text-sm uppercase">Đối chiếu: Giám định & Cân điện tử</h3>
-              </div>
-              <div className="h-8 w-px bg-slate-200"></div>
-              <select className="border border-slate-300 rounded-lg px-4 py-2 text-sm font-bold text-blue-900 focus:outline-none focus:border-blue-500 bg-slate-50 min-w-[240px] shadow-sm">
-                  <option>MV. GLORY STAR (V.2506)</option>
-                  <option>MV. OCEAN BULK (V.2502)</option>
-              </select>
-         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-200 text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-all shadow-sm">
-           <Search size={16} />
-           <span>Nạp dữ liệu</span>
-        </button>
-      </div>
-
-      {/* Main Comparison Dashboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Card: Ship Figures */}
-        <div className="bg-white border border-blue-100 rounded-xl p-6 shadow-sm relative overflow-hidden group hover:border-blue-300 transition-all">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500"></div>
-            <div className="flex justify-between items-start mb-6 pl-2">
-                <div className="flex flex-col">
-                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Số liệu Tàu</span>
-                    <span className="text-sm font-extrabold text-blue-700 flex items-center gap-2 mt-1"><Anchor size={16}/> Giám định mớn nước</span>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-full">
-                    <FileText className="text-blue-500" size={24} />
-                </div>
-            </div>
-            <div className="pl-2 text-center py-2">
-                <span className="text-5xl font-black text-slate-800 tracking-tight">{reportData.draftSurvey.toLocaleString()}</span>
-                <span className="text-sm text-slate-500 font-bold ml-2">Tấn</span>
-            </div>
-            <div className="pl-2 mt-4 text-xs text-slate-400 font-medium text-center">
-                Số liệu giám định mớn nước ban đầu
-            </div>
-        </div>
-
-        {/* Middle Card: Variance */}
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center relative">
-             <span className="text-xs text-slate-400 font-bold uppercase absolute top-4 left-4 tracking-wider">Chênh lệch</span>
-             
-             <div className={`text-6xl font-black mb-2 tracking-tighter ${variance > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                {variance > 0 ? '+' : ''}{variance}
+        <div className="flex items-center gap-4 w-full md:w-auto">
+             <div className={`p-2.5 rounded-lg text-white border ${
+                 activeTab === 'COMPARISON' ? 'bg-blue-600 border-blue-600' : 
+                 activeTab === 'CRANE' ? 'bg-orange-500 border-orange-500' : 'bg-green-600 border-green-600'
+             }`}>
+                {activeTab === 'COMPARISON' ? <FileBarChart size={20} /> : activeTab === 'CRANE' ? <Construction size={20} /> : <Layers size={20} />}
              </div>
-             <span className="text-sm font-bold text-slate-500 uppercase tracking-wide">Tấn</span>
-             
-             <div className={`mt-6 px-4 py-1.5 rounded-full text-xs font-bold border flex items-center gap-2 ${Math.abs(reportData.tolerancePercent) <= 0.5 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-                {Math.abs(reportData.tolerancePercent)}% / ±0.5%
+             <div>
+                <h3 className="font-bold text-slate-800 text-sm uppercase">
+                    {activeTab === 'COMPARISON' ? 'Đối chiếu Tàu - Kho bãi' : activeTab === 'CRANE' ? 'Nhật ký Tally Đầu Cần' : 'Nhật ký Tally Bãi'}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                    {activeTab === 'COMPARISON' ? 'So sánh Vận đơn & Thực tế' : `Dữ liệu chi tiết từ ${activeTab === 'CRANE' ? 'cầu tàu' : 'trạm cân/bãi'}`}
+                </p>
              </div>
-
-             {Math.abs(reportData.tolerancePercent) > 0.5 && (
-                 <div className="mt-4 flex items-center gap-2 text-red-600 text-xs font-bold animate-pulse">
-                    <AlertCircle size={14} />
-                    VƯỢT QUÁ DUNG SAI
-                 </div>
-             )}
+             <div className="h-8 w-px bg-slate-200 mx-2 hidden md:block"></div>
+             
+             <div className="relative">
+                <select 
+                    value={selectedShip}
+                    onChange={(e) => setSelectedShip(e.target.value)}
+                    className="appearance-none bg-slate-50 border border-slate-300 text-slate-700 text-sm font-bold rounded-lg pl-10 pr-8 py-2 focus:outline-none focus:border-blue-500 min-w-[250px]"
+                >
+                    <option>MV. GLORY STAR (V.2506)</option>
+                    <option>MV. OCEAN BULK (V.2502)</option>
+                </select>
+                <Anchor size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+             </div>
         </div>
 
-        {/* Right Card: Shore Figures */}
-        <div className="bg-white border border-green-100 rounded-xl p-6 shadow-sm relative overflow-hidden group hover:border-green-300 transition-all">
-             <div className="absolute top-0 right-0 w-1.5 h-full bg-green-500"></div>
-            <div className="flex justify-between items-start mb-6 pr-2">
-                 <div className="bg-green-50 p-3 rounded-full">
-                    <Scale className="text-green-600" size={24} />
+        <div className="flex gap-2">
+            {activeTab !== 'COMPARISON' && (
+                <div className="relative">
+                    <input type="text" placeholder="Tìm số xe..." className="border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 w-48"/>
+                    <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"/>
                 </div>
-                <div className="flex flex-col text-right">
-                    <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Số liệu Bờ</span>
-                    <span className="text-sm font-extrabold text-green-700 flex items-center justify-end gap-2 mt-1">Cân Điện Tử <ArrowRight size={16}/></span>
+            )}
+            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 text-sm font-bold rounded-lg hover:bg-slate-50 transition-all shadow-sm">
+                <RefreshCw size={16} />
+                <span>Làm mới</span>
+            </button>
+        </div>
+      </div>
+
+      {/* CONTENT: COMPARISON TAB */}
+      {activeTab === 'COMPARISON' && (
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {/* MANIFEST */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Tổng Vận Đơn (Manifest)</p>
+                        <div className="flex items-baseline gap-1 mt-1">
+                            <p className="text-2xl font-extrabold text-blue-800">{reportData.manifestTotal.toLocaleString()}</p>
+                            <span className="text-sm font-medium text-slate-400">Tấn</span>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-50 flex items-center gap-2 text-xs text-slate-500">
+                        <Anchor size={14} />
+                        <span>Theo hồ sơ tàu</span>
+                    </div>
+                </div>
+
+                {/* CRANE TALLY */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Tally Đầu Cần (Crane)</p>
+                        <div className="flex items-baseline gap-1 mt-1">
+                            <p className="text-2xl font-extrabold text-orange-600">{reportData.craneTotal.toLocaleString()}</p>
+                            <span className="text-sm font-medium text-slate-400">Tấn</span>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-50 flex items-center gap-2 text-xs text-slate-500">
+                        <Construction size={14} />
+                        <span>Sản lượng qua cầu</span>
+                    </div>
+                </div>
+
+                {/* YARD TALLY */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Tally Bãi (Yard)</p>
+                        <div className="flex items-baseline gap-1 mt-1">
+                            <p className="text-2xl font-extrabold text-emerald-700">{reportData.yardTotal.toLocaleString()}</p>
+                            <span className="text-sm font-medium text-slate-400">Tấn</span>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-50 flex items-center gap-2 text-xs text-slate-500">
+                        <Layers size={14} />
+                        <span>Thực nhập kho bãi</span>
+                    </div>
+                </div>
+
+                {/* VARIANCE */}
+                <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Chênh Lệch (Bãi - VĐ)</p>
+                        <div className="flex items-baseline gap-2 mt-1">
+                            <p className={`text-2xl font-extrabold ${variance >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                {variance > 0 ? '+' : ''}{variance.toLocaleString()}
+                            </p>
+                            <span className="text-sm font-medium text-slate-400">Tấn</span>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-3 border-t border-slate-50 flex items-center gap-2 text-xs font-bold">
+                        <span className={`px-2 py-0.5 rounded ${isToleranceOk ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {variancePercent > 0 ? '+' : ''}{variancePercent.toFixed(2)}%
+                        </span>
+                        <span className="text-slate-400 font-normal ml-auto flex items-center gap-1">
+                            <AlertCircle size={12}/>
+                            {isToleranceOk ? 'Đạt' : 'Lệch'}
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div className="pr-2 text-center py-2">
-                <span className="text-5xl font-black text-slate-800 tracking-tight">{reportData.scaleTotal.toLocaleString()}</span>
-                <span className="text-sm text-slate-500 font-bold ml-2">Tấn</span>
-            </div>
-             <div className="pr-2 mt-4 text-xs text-slate-400 font-medium text-center">
-                Tổng cộng dồn các phiếu cân xe
-            </div>
-        </div>
-      </div>
 
-      {/* Visual Comparison Bar Chart */}
-      <div className="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
-          <h4 className="text-sm font-bold text-slate-700 uppercase mb-8 tracking-wide">Biểu đồ so sánh sản lượng</h4>
-          <div className="flex flex-col gap-8">
-              {/* Draft Bar */}
-              <div className="relative">
-                  <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
-                      <span>Giám định Mớn nước</span>
-                      <span>{reportData.draftSurvey.toLocaleString()}</span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-10 rounded-lg overflow-hidden flex shadow-inner">
-                      <div className="h-full bg-blue-500 relative flex items-center pl-4 text-white text-xs font-bold" style={{ width: '100%' }}>
-                          100%
-                      </div>
-                  </div>
-              </div>
-              
-              {/* Scale Bar */}
-              <div className="relative">
-                   <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
-                      <span>Cân Điện Tử</span>
-                      <span>{reportData.scaleTotal.toLocaleString()}</span>
-                  </div>
-                  <div className="w-full bg-slate-100 h-10 rounded-lg overflow-hidden flex shadow-inner">
-                      <div 
-                        className={`h-full relative flex items-center pl-4 text-white text-xs font-bold transition-all duration-1000 ${variance >= 0 ? 'bg-green-500' : 'bg-red-500'}`} 
-                        style={{ width: `${(reportData.scaleTotal / reportData.draftSurvey) * 100}%` }}
-                      >
-                         {((reportData.scaleTotal / reportData.draftSurvey) * 100).toFixed(2)}%
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
+            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1">
+                <div className="px-6 py-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <h4 className="font-bold text-slate-700 text-sm uppercase flex items-center gap-2">
+                        <ArrowRightLeft size={16} className="text-blue-500" />
+                        Bảng chi tiết số liệu
+                    </h4>
+                </div>
+                
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th className="py-4 px-6 text-center w-16">STT</th>
+                                <th className="py-4 px-6 text-left">Ngày</th>
+                                <th className="py-4 px-6 text-left">Ca làm việc</th>
+                                <th className="py-4 px-6 text-right text-blue-700">Vận Đơn (Manifest)</th>
+                                <th className="py-4 px-6 text-right text-orange-700">Tally Đầu Cần</th>
+                                <th className="py-4 px-6 text-right text-green-700">Tally Bãi</th>
+                                <th className="py-4 px-6 text-center">Chênh lệch (Bãi - VĐ)</th>
+                                <th className="py-4 px-6 text-left">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {shiftDetails.map((row, index) => {
+                                const rowDiff = row.yardTally - row.manifest;
+                                return (
+                                    <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                                        <td className="py-4 px-6 text-center text-slate-400">{index + 1}</td>
+                                        <td className="py-4 px-6 font-medium text-slate-600">{row.date}</td>
+                                        <td className="py-4 px-6 font-bold text-slate-800">{row.shift}</td>
+                                        <td className="py-4 px-6 text-right font-medium text-blue-700">{row.manifest.toLocaleString()}</td>
+                                        <td className="py-4 px-6 text-right font-bold text-orange-600">{row.craneTally.toLocaleString()}</td>
+                                        <td className="py-4 px-6 text-right font-bold text-green-600">{row.yardTally.toLocaleString()}</td>
+                                        <td className={`py-4 px-6 text-center font-bold ${rowDiff >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                            {rowDiff > 0 ? '+' : ''}{rowDiff}
+                                        </td>
+                                        <td className="py-4 px-6 text-slate-500 italic text-xs">{row.note}</td>
+                                    </tr>
+                                );
+                            })}
+                            <tr className="bg-slate-50/80 font-bold border-t border-slate-200">
+                                <td className="py-4 px-6 text-center" colSpan={3}>TỔNG CỘNG</td>
+                                <td className="py-4 px-6 text-right text-blue-800">{reportData.manifestTotal.toLocaleString()}</td>
+                                <td className="py-4 px-6 text-right text-orange-800">{reportData.craneTotal.toLocaleString()}</td>
+                                <td className="py-4 px-6 text-right text-emerald-800">{reportData.yardTotal.toLocaleString()}</td>
+                                <td className={`py-4 px-6 text-center ${variance >= 0 ? 'text-green-700' : 'text-red-600'}`}>
+                                    {variance > 0 ? '+' : ''}{variance.toLocaleString()}
+                                </td>
+                                <td className="py-4 px-6"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </>
+      )}
 
-      {/* Shift Breakdown Table */}
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-6">
-        <div className="p-4 border-b border-slate-100 bg-slate-50">
-            <h4 className="text-xs font-bold text-slate-600 uppercase tracking-wide">Chi tiết sai lệch theo ca</h4>
+      {/* CONTENT: CRANE TALLY TAB */}
+      {activeTab === 'CRANE' && (
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1">
+             <div className="overflow-x-auto custom-scrollbar max-h-[600px]">
+                <table className="w-full text-sm text-left border-collapse min-w-[1200px]">
+                    <thead className="bg-orange-50 text-orange-800 text-xs font-bold uppercase tracking-wider border-b border-orange-100 sticky top-0 z-10">
+                        <tr>
+                            <th className="py-4 px-6 text-center w-16">STT</th>
+                            <th className="py-4 px-6 text-left">Thiết bị</th>
+                            <th className="py-4 px-6 text-left">Hầm hàng</th>
+                            <th className="py-4 px-6 text-left">Số xe / Số romooc</th>
+                            <th className="py-4 px-6 text-left">Thời gian</th>
+                            <th className="py-4 px-6 text-left">Loại hàng</th>
+                            <th className="py-4 px-6 text-right">KL Tịnh (kg)</th>
+                            <th className="py-4 px-6 text-left">Tallyman</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {craneTallyData.map((row, index) => (
+                            <tr key={row.id} className="hover:bg-orange-50/30 transition-colors">
+                                <td className="py-3 px-6 text-center text-slate-400 font-medium">
+                                    <div>{index + 1}</div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-700 font-bold whitespace-nowrap">
+                                    <div className="flex items-center gap-2">
+                                        <Hammer size={14} className="text-slate-400"/>
+                                        {row.equipment}
+                                    </div>
+                                </td>
+                                <td className="py-3 px-6 text-blue-600 font-medium whitespace-nowrap">
+                                    <div>{row.hold}</div>
+                                </td>
+                                <td className="py-3 px-6 font-bold text-slate-800 whitespace-nowrap">
+                                     <div className="flex items-center gap-2">
+                                        <Truck size={14} className="text-slate-400"/>
+                                        {row.truck}
+                                     </div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-600 whitespace-nowrap">
+                                    <div>{row.time}</div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-700 whitespace-nowrap">
+                                    <div>{row.commodity}</div>
+                                </td>
+                                <td className="py-3 px-6 text-right font-mono font-bold text-orange-700">
+                                    <div>{row.weight.toLocaleString()}</div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-500 italic whitespace-nowrap">
+                                    <div>{row.tallyman}</div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+             </div>
         </div>
-        <table className="w-full text-sm">
-            <thead>
-                <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                    <th className="py-4 px-6 text-left">Ca làm việc</th>
-                    <th className="py-4 px-6 text-right">Giám định (Tấn)</th>
-                    <th className="py-4 px-6 text-right">Cân điện tử (Tấn)</th>
-                    <th className="py-4 px-6 text-center">Chênh lệch (Tấn)</th>
-                    <th className="py-4 px-6 text-center">Đánh giá</th>
-                </tr>
-            </thead>
-            <tbody>
-                {shiftDetails.map((row, idx) => (
-                    <tr key={row.id} className={`border-b border-slate-100 hover:bg-slate-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                        <td className="py-4 px-6 font-bold text-slate-700">{row.shift}</td>
-                        <td className="py-4 px-6 text-right font-mono text-blue-700 font-medium">{row.draft.toLocaleString()}</td>
-                        <td className="py-4 px-6 text-right font-mono text-green-700 font-medium">{row.scale.toLocaleString()}</td>
-                        <td className="py-4 px-6 text-center font-bold">
-                            <span className={row.diff > 0 ? 'text-green-600' : 'text-red-500'}>
-                                {row.diff > 0 ? '+' : ''}{row.diff}
-                            </span>
-                        </td>
-                         <td className="py-4 px-6 text-center">
-                            {Math.abs(row.diff) < 50 ? (
-                                <span className="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-bold uppercase border border-green-200">Khớp</span>
-                            ) : (
-                                <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-bold uppercase border border-yellow-200">Kiểm tra</span>
-                            )}
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-      </div>
+      )}
+
+      {/* CONTENT: YARD TALLY TAB */}
+      {activeTab === 'YARD' && (
+        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex-1">
+             <div className="overflow-x-auto custom-scrollbar max-h-[600px]">
+                <table className="w-full text-sm text-left border-collapse min-w-[1200px]">
+                    <thead className="bg-green-50 text-green-800 text-xs font-bold uppercase tracking-wider border-b border-green-100 sticky top-0 z-10">
+                        <tr>
+                            <th className="py-4 px-6 text-center w-16">STT</th>
+                            <th className="py-4 px-6 text-left">Vị trí Bãi</th>
+                            <th className="py-4 px-6 text-left">Thiết bị</th>
+                            <th className="py-4 px-6 text-left">Số xe / Số romooc</th>
+                            <th className="py-4 px-6 text-center">Giờ Vào</th>
+                            <th className="py-4 px-6 text-center">Giờ Ra</th>
+                            <th className="py-4 px-6 text-left">Loại hàng</th>
+                            <th className="py-4 px-6 text-right">KL Tịnh (kg)</th>
+                            <th className="py-4 px-6 text-left">Nhân viên cân</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {yardTallyData.map((row, index) => (
+                            <tr key={row.id} className="hover:bg-green-50/30 transition-colors">
+                                <td className="py-3 px-6 text-center text-slate-400 font-medium">
+                                    <div>{index + 1}</div>
+                                </td>
+                                <td className="py-3 px-6 font-bold text-slate-700 whitespace-nowrap">
+                                    <div className="flex items-center gap-2">
+                                        <Layers size={14} className="text-slate-400"/>
+                                        {row.location}
+                                    </div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-700 font-medium whitespace-nowrap">
+                                    <div className="flex items-center gap-2">
+                                        <Hammer size={14} className="text-slate-400"/>
+                                        {row.equipment}
+                                    </div>
+                                </td>
+                                <td className="py-3 px-6 font-bold text-slate-800 whitespace-nowrap">
+                                     <div className="flex items-center gap-2">
+                                        <Truck size={14} className="text-slate-400"/>
+                                        {row.truck}
+                                     </div>
+                                </td>
+                                <td className="py-3 px-6 text-center text-slate-600 whitespace-nowrap">
+                                    <div className="flex items-center justify-center gap-1">
+                                        <Clock size={12} className="text-green-500"/> {row.timeIn}
+                                    </div>
+                                </td>
+                                <td className="py-3 px-6 text-center text-slate-600 whitespace-nowrap">
+                                     <div className="flex items-center justify-center gap-1">
+                                        <Clock size={12} className="text-orange-400"/> {row.timeOut}
+                                     </div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-700 whitespace-nowrap">
+                                    <div>{row.commodity}</div>
+                                </td>
+                                <td className="py-3 px-6 text-right font-mono font-bold text-green-700">
+                                    <div>{row.netWeight.toLocaleString()}</div>
+                                </td>
+                                <td className="py-3 px-6 text-slate-500 italic whitespace-nowrap">
+                                    <div>{row.weigher}</div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+             </div>
+        </div>
+      )}
     </div>
   );
 };
