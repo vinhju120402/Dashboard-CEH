@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Search, Clipboard, Truck, ArrowDownToLine, ArrowUpFromLine, Ship } from 'lucide-react';
 
 export const BulkTallyDelivery: React.FC = () => {
-  const [dateFilter, setDateFilter] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [subTab, setSubTab] = useState<'INBOUND' | 'OUTBOUND'>('INBOUND');
   const [ticketFilter, setTicketFilter] = useState('');
   const [vehicleFilter, setVehicleFilter] = useState('');
@@ -37,13 +38,16 @@ export const BulkTallyDelivery: React.FC = () => {
     // Filter by Ship
     if (shipFilter && item.ship !== shipFilter) return false;
 
-    // Filter by Date
-    if (dateFilter) {
-        const [year, month, day] = dateFilter.split('-');
-        const formattedDate = `${day}/${month}/${year}`;
-        if (!(item.timeIn.includes(formattedDate) || (item.timeOut !== '--' && item.timeOut.includes(formattedDate)))) {
-            return false;
-        }
+    // Filter by Date Range
+    if (fromDate || toDate) {
+        // item.timeIn format is "17/06/2025 HH:mm"
+        const datePart = item.timeIn.split(' ')[0];
+        const [day, month, year] = datePart.split('/');
+        // Create ISO string YYYY-MM-DD for comparison
+        const itemIsoDate = `${year}-${month}-${day}`;
+
+        if (fromDate && itemIsoDate < fromDate) return false;
+        if (toDate && itemIsoDate > toDate) return false;
     }
     
     // Filter by Ticket
@@ -124,13 +128,24 @@ export const BulkTallyDelivery: React.FC = () => {
                 </div>
             )}
 
-            {/* Date Filter */}
+            {/* From Date Filter */}
             <div className="flex flex-col">
-              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Ngày tháng</label>
+              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Từ ngày</label>
               <input 
                   type="date" 
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value)}
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-36 shadow-sm"
+              />
+            </div>
+
+            {/* To Date Filter */}
+            <div className="flex flex-col">
+              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Đến ngày</label>
+              <input 
+                  type="date" 
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
                   className="border border-slate-300 rounded-lg px-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white w-36 shadow-sm"
               />
             </div>

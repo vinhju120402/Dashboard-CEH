@@ -77,11 +77,8 @@ const App: React.FC = () => {
             <button onClick={() => setActiveTab('YARD_OPS')} className={getTabClass('YARD_OPS')}>
               <Layers size={16} /> Điều hành bãi
             </button>
-            <button onClick={() => setActiveTab('STORAGE_SHIP')} className={getTabClass('STORAGE_SHIP')}>
-              <Database size={16} /> Tồn kho (Tàu)
-            </button>
-             <button onClick={() => setActiveTab('STORAGE_MIXED')} className={getTabClass('STORAGE_MIXED')}>
-              <Database size={16} /> Tồn kho (Trộn)
+            <button onClick={() => setActiveTab('STORAGE')} className={getTabClass('STORAGE')}>
+              <Database size={16} /> Hàng Tồn Kho
             </button>
             <button onClick={() => setActiveTab('TALLY_SHIP_YARD')} className={getTabClass('TALLY_SHIP_YARD')}>
               <Scale size={16} /> Kiểm đếm Tàu-kho bãi
@@ -89,6 +86,8 @@ const App: React.FC = () => {
             <button onClick={() => setActiveTab('CARGO_DIST')} className={getTabClass('CARGO_DIST')}>
               <Truck size={16} /> Phân bổ hàng
             </button>
+            {/* Empty slot for layout balance or future feature */}
+            <div className="hidden md:block"></div>
           </div>
         </div>
 
@@ -106,9 +105,7 @@ const App: React.FC = () => {
            
            {activeTab === 'YARD_OPS' && <YardGeneralOps />}
 
-           {activeTab === 'STORAGE_SHIP' && <YardStorage mode="ship" />}
-
-           {activeTab === 'STORAGE_MIXED' && <YardStorage mode="mixed" />}
+           {activeTab === 'STORAGE' && <YardStorage />}
 
            {activeTab === 'TALLY_SHIP_YARD' && <TallyComparison />}
 

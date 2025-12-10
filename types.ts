@@ -27,7 +27,6 @@ export type TabType =
   | 'WEIGH'
   | 'GATE_OPS'
   | 'YARD_OPS'
-  | 'STORAGE_SHIP'
-  | 'STORAGE_MIXED'
+  | 'STORAGE'
   | 'TALLY_SHIP_YARD'
   | 'CARGO_DIST';

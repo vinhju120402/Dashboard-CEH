@@ -1,12 +1,9 @@
 
 import React, { useState } from 'react';
-import { Search, Database, Layers, Filter, Ship } from 'lucide-react';
+import { Search, Database, Layers, Filter, Ship, Cuboid } from 'lucide-react';
 
-interface YardStorageProps {
-    mode: 'ship' | 'mixed';
-}
-
-export const YardStorage: React.FC<YardStorageProps> = ({ mode }) => {
+export const YardStorage: React.FC = () => {
+  const [mode, setMode] = useState<'ship' | 'mixed'>('ship');
   const isShipMode = mode === 'ship';
   const [yardFilter, setYardFilter] = useState('');
   const [shipFilter, setShipFilter] = useState('MV. GLORY STAR');
@@ -42,16 +39,43 @@ export const YardStorage: React.FC<YardStorageProps> = ({ mode }) => {
 
   return (
     <div className="flex flex-col gap-6 animate-fadeIn">
+
+      {/* Sub-tabs Navigation */}
+      <div className="flex justify-center gap-4 border-b border-slate-200 pb-1">
+        <button
+            onClick={() => setMode('ship')}
+            className={`px-8 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                mode === 'ship' 
+                ? 'bg-white text-blue-700 border-blue-600 shadow-sm -mb-px border-x border-slate-200 z-10' 
+                : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
+            }`}
+        >
+            <Ship size={18} />
+            HÀNG TỒN THEO TÀU
+        </button>
+        <button
+            onClick={() => setMode('mixed')}
+             className={`px-8 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
+                mode === 'mixed' 
+                ? 'bg-white text-orange-600 border-orange-500 shadow-sm -mb-px border-x border-slate-200 z-10' 
+                : 'bg-slate-50 text-slate-500 border-transparent hover:bg-slate-100 hover:text-slate-700'
+            }`}
+        >
+            <Cuboid size={18} />
+            HÀNG TỒN BÃI TRỘN
+        </button>
+      </div>
+
       {/* Control Bar */}
       <div className="bg-white border border-slate-200 p-5 rounded-xl shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
            <div className="flex items-center gap-6 w-full md:w-auto flex-wrap">
                 <div className="flex items-center gap-3 mr-2">
-                    <div className="bg-blue-100 p-2 rounded-lg text-blue-600">
+                    <div className={`p-2 rounded-lg ${isShipMode ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
                         <Database size={20} />
                     </div>
                     <h3 className="font-bold text-slate-700 text-sm uppercase whitespace-nowrap">
-                        {isShipMode ? 'Hàng tồn theo tàu' : 'Hàng tồn bãi trộn'}
+                        {isShipMode ? 'Danh sách tồn kho' : 'Danh sách tồn bãi trộn'}
                     </h3>
                 </div>
                 
@@ -106,16 +130,16 @@ export const YardStorage: React.FC<YardStorageProps> = ({ mode }) => {
         <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
           <table className="w-full border-collapse min-w-[1200px]">
             <thead className="sticky top-0 z-10">
-              <tr className="bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200 shadow-sm">
-                <th className="py-4 px-6 border-r border-slate-100 w-16 text-center bg-slate-50">STT</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Bãi / Lô</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Loại hàng</th>
+              <tr className={`text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-200 shadow-sm ${isShipMode ? 'bg-blue-50' : 'bg-orange-50'}`}>
+                <th className="py-4 px-6 border-r border-white/20 w-16 text-center">STT</th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Bãi / Lô</th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Loại hàng</th>
                 {/* Show Ship column if in mixed mode to identify source */}
-                {!isShipMode && <th className="py-4 px-6 border-r border-slate-100 text-left bg-slate-50">Tàu (Nguồn)</th>}
-                <th className="py-4 px-6 border-r border-slate-100 text-center bg-slate-50">Số lượng (Đống)</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-right bg-slate-50">Trọng lượng (Tấn)</th>
-                <th className="py-4 px-6 border-r border-slate-100 text-right bg-slate-50">Tồn kho thực tế (Tấn)</th>
-                <th className="py-4 px-6 text-center bg-slate-50">Cập nhật cuối</th>
+                {!isShipMode && <th className="py-4 px-6 border-r border-white/20 text-left">Tàu (Nguồn)</th>}
+                <th className="py-4 px-6 border-r border-white/20 text-center">Số lượng (Đống)</th>
+                <th className="py-4 px-6 border-r border-white/20 text-right">Trọng lượng (Tấn)</th>
+                <th className="py-4 px-6 border-r border-white/20 text-right">Tồn kho thực tế (Tấn)</th>
+                <th className="py-4 px-6 text-center">Cập nhật cuối</th>
               </tr>
             </thead>
             <tbody className="text-sm text-slate-700">
