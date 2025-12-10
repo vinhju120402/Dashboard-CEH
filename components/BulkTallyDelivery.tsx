@@ -71,7 +71,7 @@ export const BulkTallyDelivery: React.FC = () => {
       {/* Sub-tabs Navigation */}
       <div className="flex justify-center gap-4 border-b border-slate-200 pb-1">
         <button
-            onClick={() => setSubTab('INBOUND')}
+            onClick={() => { setSubTab('INBOUND'); setShipFilter(''); }}
             className={`px-8 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
                 subTab === 'INBOUND' 
                 ? 'bg-white text-blue-700 border-blue-600 shadow-sm -mb-px border-x border-slate-200 z-10' 
@@ -82,7 +82,7 @@ export const BulkTallyDelivery: React.FC = () => {
             HẠ TẬP KẾT
         </button>
         <button
-            onClick={() => setSubTab('OUTBOUND')}
+            onClick={() => { setSubTab('OUTBOUND'); setShipFilter(''); }}
              className={`px-8 py-3 text-sm font-bold flex items-center gap-2 rounded-t-lg transition-all border-t-4 ${
                 subTab === 'OUTBOUND' 
                 ? 'bg-white text-orange-600 border-orange-500 shadow-sm -mb-px border-x border-slate-200 z-10' 
@@ -108,25 +108,23 @@ export const BulkTallyDelivery: React.FC = () => {
                 </h3>
              </div>
 
-            {/* Ship Filter - Only show for OUTBOUND */}
-            {subTab === 'OUTBOUND' && (
-                <div className="flex flex-col">
-                <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Tàu chuyến</label>
-                <div className="relative">
-                    <select 
-                        value={shipFilter}
-                        onChange={(e) => setShipFilter(e.target.value)}
-                        className="border border-slate-300 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white min-w-[180px] shadow-sm appearance-none"
-                    >
-                        <option value="">Tất cả tàu</option>
-                        <option value="MV. GLORY STAR">MV. GLORY STAR</option>
-                        <option value="MV. OCEAN BULK">MV. OCEAN BULK</option>
-                        <option value="MV. PACIFIC DREAM">MV. PACIFIC DREAM</option>
-                    </select>
-                    <Ship size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-                </div>
-                </div>
-            )}
+            {/* Ship Filter - Available for both INBOUND and OUTBOUND */}
+            <div className="flex flex-col">
+              <label className="text-xs text-slate-500 font-bold mb-1 uppercase">Tàu chuyến</label>
+              <div className="relative">
+                  <select 
+                      value={shipFilter}
+                      onChange={(e) => setShipFilter(e.target.value)}
+                      className="border border-slate-300 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 bg-white min-w-[180px] shadow-sm appearance-none"
+                  >
+                      <option value="">Tất cả tàu</option>
+                      <option value="MV. GLORY STAR">MV. GLORY STAR</option>
+                      <option value="MV. OCEAN BULK">MV. OCEAN BULK</option>
+                      <option value="MV. PACIFIC DREAM">MV. PACIFIC DREAM</option>
+                  </select>
+                  <Ship size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+              </div>
+            </div>
 
             {/* From Date Filter */}
             <div className="flex flex-col">
@@ -217,6 +215,7 @@ export const BulkTallyDelivery: React.FC = () => {
                 <th className="py-4 px-6 border-r border-white/20 text-left">
                     {subTab === 'INBOUND' ? 'Số xe / Romooc' : 'Số xe'}
                 </th>
+                <th className="py-4 px-6 border-r border-white/20 text-left">Tàu chuyến</th>
                 <th className="py-4 px-6 border-r border-white/20 text-center">Ca làm việc</th>
                 <th className="py-4 px-6 border-r border-white/20 text-center">Giờ Vào</th>
                 <th className="py-4 px-6 border-r border-white/20 text-center">Giờ Ra</th>
@@ -234,6 +233,9 @@ export const BulkTallyDelivery: React.FC = () => {
                   <td className="py-4 px-6 font-bold text-slate-800 flex items-center gap-2">
                       <div className="bg-slate-100 p-1 rounded text-slate-500"><Truck size={14}/></div>
                       {row.truck}
+                  </td>
+                  <td className="py-4 px-6 text-blue-600 font-medium text-xs">
+                     {row.ship}
                   </td>
                   <td className="py-4 px-6 text-center text-slate-600 font-medium">{row.shift}</td>
                   <td className="py-4 px-6 text-center text-slate-600">{row.timeIn}</td>
@@ -254,7 +256,7 @@ export const BulkTallyDelivery: React.FC = () => {
               ))}
               {filteredData.length === 0 && (
                 <tr>
-                    <td colSpan={10} className="py-8 text-center text-slate-400 italic">Không tìm thấy dữ liệu phù hợp</td>
+                    <td colSpan={11} className="py-8 text-center text-slate-400 italic">Không tìm thấy dữ liệu phù hợp</td>
                 </tr>
               )}
             </tbody>
